@@ -1,6 +1,8 @@
 ;;; Mulit Univalse Memo
 ;;;
 ;;; Just small tool for takeing mamo.
+;;;
+;;; SASAKI, Takesi  dagezi@gmail.com
 
 (require 'cl)
 
@@ -9,10 +11,9 @@
 
 (defvar mumemo-default-universe
   (make-mumemo-universe 
-   :name "default" 
+   :name "mumemo" 
    :directory (expand-file-name "~/mumemo")
-   :path-template "%Y-%m/%d-%H%M%S.md" ))
-
+   :path-template "%Y/%m/%d-%H%M%S.md" ))
 (defvar mumemo-universes (list mumemo-default-universe)
   "The list of mumemo universes")
 
@@ -59,26 +60,73 @@
 
 (defun mumemo-universe-get-all-items (universe)
   (let ((default-directory (mumemo-universe-directory universe))
-	(dir-stack '(""))
+	(dir-stack '("."))
 	result)
     (while dir-stack
       (let* ((dir (pop dir-stack))
 	     (files (directory-files dir nil nil t))) ;; TODO: add match
 	(mapc
 	 #'(lambda (file)
-	     (unless (string-match "\\.\\.?" file)
-	       (let ((path (concat dir "/" file)))
+	     (unless (string-match "^\\.\\.?$" file)
+	       (let ((path (if (equal dir ".") file (concat dir "/" file))))
 		 (if (file-directory-p path)
 		     (push path dir-stack)
 		   (push (mumemo-create-item universe path) result)))))
 	 files)))
     result))
-
+
 (defvar mumemo-list-recent-days 14)
 
 (defun mumemo-show-recent-files (days)
   "Show recent modified files for all universes"
-  (interactive "P"))
+  (interactive "P")
+  (when (null days)
+    (setq days mumemo-list-recent-days))
+  
+  (let* ((threshold (time-subtract (current-time) (days-to-time days)))
+	 (items
+	  (mapcan
+	   #'(lambda (universe)
+	       (remove-if 
+		#'(lambda (item) 
+		    (time-less-p (mumemo-item-mtime item) threshold))
+		(mumemo-universe-get-all-items universe)))
+	   mumemo-universes))
+	 (sorted-items 
+	  (sort items 
+		#'(lambda (item0 item1)
+		    (not (time-less-p (mumemo-item-mtime item0)
+				     (mumemo-item-mtime item1)))))))
+    (mumemo-list-new-buffer "*mumemo*" sorted-items)))
+
+(defun mumemo-list-mode ()
+  ;;; TODO: key bindings or so...
+  (interactive)
+  )
+
+(defun mumemo-put-item-property-to-string (string item)
+  (put-text-property 0 (length string) :mumemo-item item string)
+  string)
+
+(defun mumemo-list-format-item (item)
+  (let ((string
+	 (format "%10s|%s| %s\n"
+		 (mumemo-universe-name (mumemo-item-universe item))
+		 (format-time-string "%m%d" (mumemo-item-mtime item))
+		 (mumemo-item-path item))))   ;; TODO: add snipet1
+    (mumemo-put-item-property-to-string string item)))
 
 
+(defun mumemo-list-new-buffer (buffer-name items)
+  ;; TODO: support custom format
+  (let ((buffer (get-buffer-create buffer-name)))
+    (set-buffer buffer)
+    (erase-buffer)
+    (mapc #'(lambda (item)
+	      (insert (mumemo-list-format-item item)))
+	  items)
+    (mumemo-list-mode)
+    (switch-to-buffer buffer)))
+		       
+
 (provide 'mumemo)
