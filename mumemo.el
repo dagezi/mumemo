@@ -6,6 +6,8 @@
 
 (require 'cl)
 
+(require 'mumemo-list)
+
 (defstruct mumemo-universe 
   name directory path-template)  ;; TODO: remember symbolic dir like "~/howm"
 
@@ -14,6 +16,7 @@
    :name "mumemo" 
    :directory (expand-file-name "~/mumemo")
    :path-template "%Y/%m/%d-%H%M%S.md" ))
+
 (defvar mumemo-universes (list mumemo-default-universe)
   "The list of mumemo universes")
 
@@ -74,6 +77,10 @@
 		   (push (mumemo-create-item universe path) result)))))
 	 files)))
     result))
+
+(defun mumemo-open-item (item)
+  (find-file (concat (mumemo-universe-directory (mumemo-item-universe item)) "/"
+		     (mumemo-item-path item))))
 
 (defvar mumemo-list-recent-days 14)
 
@@ -98,35 +105,5 @@
 		    (not (time-less-p (mumemo-item-mtime item0)
 				     (mumemo-item-mtime item1)))))))
     (mumemo-list-new-buffer "*mumemo*" sorted-items)))
-
-(defun mumemo-list-mode ()
-  ;;; TODO: key bindings or so...
-  (interactive)
-  )
-
-(defun mumemo-put-item-property-to-string (string item)
-  (put-text-property 0 (length string) :mumemo-item item string)
-  string)
-
-(defun mumemo-list-format-item (item)
-  (let ((string
-	 (format "%10s|%s| %s\n"
-		 (mumemo-universe-name (mumemo-item-universe item))
-		 (format-time-string "%m%d" (mumemo-item-mtime item))
-		 (mumemo-item-path item))))   ;; TODO: add snipet1
-    (mumemo-put-item-property-to-string string item)))
-
-
-(defun mumemo-list-new-buffer (buffer-name items)
-  ;; TODO: support custom format
-  (let ((buffer (get-buffer-create buffer-name)))
-    (set-buffer buffer)
-    (erase-buffer)
-    (mapc #'(lambda (item)
-	      (insert (mumemo-list-format-item item)))
-	  items)
-    (mumemo-list-mode)
-    (switch-to-buffer buffer)))
-		       
 
 (provide 'mumemo)
