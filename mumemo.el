@@ -1,6 +1,6 @@
-;;; Mulit Univalse Memo
+;;; Mulit Universe Memo
 ;;;
-;;; Just small tool for takeing mamo.
+;;; Just small tool for taking memo.
 ;;;
 ;;; SASAKI, Takesi  dagezi@gmail.com
 
@@ -11,16 +11,20 @@
 (defstruct mumemo-universe 
   name directory path-template)  ;; TODO: remember symbolic dir like "~/howm"
 
-(defvar mumemo-default-universe
+(defvar mumemo-universe-default
   (make-mumemo-universe 
-   :name "mumemo" 
-   :directory (expand-file-name "~/mumemo")
    :path-template "%Y/%m/%d-%H%M%S.md" ))
 
-(defvar mumemo-universes (list mumemo-default-universe)
-  "The list of mumemo universes")
+(defvar mumemo-universes nil "*The list of mumemo universes")
 
 (defvar mumemo-current-universe nil "Universe which current file belongs to")
+
+(defun* mumemo-universe-new 
+    (name 
+     &key 
+     (directory (mumemo-universe-directory mumemo-universe-default))
+     (path-template (mumemo-universe-path-template mumemo-universe-default)))
+  (make-mumemo-universe :name name :directory directory :path-template path-template))
 
 (defun mumemo-get-universe (name)
   (some #'(lambda (univ) (and (equal name (mumemo-universe-name univ)) univ))
