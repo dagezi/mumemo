@@ -58,12 +58,30 @@
 (defstruct mumemo-item 
   universe  ; universe to which this item belongs
   path      ; relative path from universe's directory
+  snippet   ; snippet string cache
   mtime)    ; mtime in Elisp way (high low usec psec)
 
 (defun mumemo-create-item (universe path)
   (let* ((a-path (concat (mumemo-universe-directory universe) "/" path))
 	 (mtime (nth 5 (file-attributes a-path))))
     (make-mumemo-item :universe universe :path  path :mtime mtime)))
+
+(defun mumemo-item-get-absolute-path (item)
+  (concat (mumemo-universe-directory (mumemo-item-universe item)) "/"
+	  (mumemo-item-path item)))
+
+(defun mumemo-item-get-snippet (item)
+  ;; TODO: when to validate snippet cache?
+  (or (mumemo-item-snippet item)
+      (let ((snippet 
+	     (with-temp-buffer
+	       (insert-file-contents (mumemo-item-get-absolute-path item) nil 0 1024)
+	       (goto-char (point-min))
+	       (save-match-data
+		 (looking-at ".*")
+		 (match-string 0)))))
+	(setf (mumemo-item-snippet item) snippet)
+	snippet)))
 
 (defun mumemo-universe-get-all-items (universe)
   (let ((default-directory (mumemo-universe-directory universe))
@@ -83,8 +101,8 @@
     result))
 
 (defun mumemo-open-item (item)
-  (find-file (concat (mumemo-universe-directory (mumemo-item-universe item)) "/"
-		     (mumemo-item-path item))))
+  (find-file (mumemo-item-get-absolute-path item)))
+
 
 (defvar mumemo-list-recent-days 14)
 

@@ -21,10 +21,11 @@
 
 (defun mumemo-list-format-item (item)
   (let ((string
-	 (format "%10s|%s| %s\n"
+	 (format "%10s|%s|%20s| %s\n"
 		 (mumemo-universe-name (mumemo-item-universe item))
 		 (format-time-string "%m%d" (mumemo-item-mtime item))
-		 (mumemo-item-path item))))   ;; TODO: add snipet1
+		 (mumemo-item-path item)
+		 (mumemo-item-get-snippet item))))
     (mumemo-put-item-property-to-string string item)))
 
 
@@ -33,6 +34,7 @@
   (let ((buffer (get-buffer-create buffer-name)))
     (set-buffer buffer)
     (setq buffer-undo-list t)
+    (setq buffer-read-only nil)
     (erase-buffer)
     (mapc #'(lambda (item)
 	      (insert (mumemo-list-format-item item)))
@@ -40,6 +42,7 @@
     (set-buffer-modified-p nil)
     (setq buffer-read-only t)
     (mumemo-list-mode)
+    (setq truncate-lines t)
     (switch-to-buffer buffer)))
 
 (defun mumemo-list-open (position)
