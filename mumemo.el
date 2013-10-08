@@ -127,5 +127,14 @@
     (find-file a-path)
     ;; TODO: add temlate?
 ))
+
+(defcustom mumemo-prefix-key "\C-c," "*Prefix key of mumemo commands")
+
+(defvar mumemo-global-map (make-sparse-keymap))
+(define-key mumemo-global-map "c" #'mumemo-create-file)
+(define-key mumemo-global-map "l" #'mumemo-show-recent-files)
+
+(global-set-key mumemo-prefix-key mumemo-global-map)
+
 
 (provide 'mumemo)
