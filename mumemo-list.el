@@ -28,7 +28,6 @@
 		 (mumemo-item-get-snippet item))))
     (mumemo-put-item-property-to-string string item)))
 
-
 (defun mumemo-list-new-buffer (buffer-name items)
   ;; TODO: support custom format
   (let ((buffer (get-buffer-create buffer-name)))
@@ -49,6 +48,6 @@
   (interactive "d")
   (let ((item (get-text-property position :mumemo-item)))
     (when item
-      (mumemo-open-item item))))
+      (mumemo-item-open item))))
 
 (provide 'mumemo-list)

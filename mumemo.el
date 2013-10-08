@@ -19,41 +19,29 @@
 
 (defvar mumemo-current-universe nil "Universe which current file belongs to")
 
-(defun* mumemo-universe-new 
+(defun* mumemo-universe-create 
     (name 
      &key 
      (directory (mumemo-universe-directory mumemo-universe-default))
      (path-template (mumemo-universe-path-template mumemo-universe-default)))
   (make-mumemo-universe :name name :directory directory :path-template path-template))
 
-(defun mumemo-get-universe (name)
+(defun mumemo-universe-get (name)
   (some #'(lambda (univ) (and (equal name (mumemo-universe-name univ)) univ))
 	mumemo-universes))
 
-(defun mumemo-universes-names ()
+(defun mumemo-universe-names ()
   (mapcar #'mumemo-universe-name mumemo-universes))
 
-(defun mumemo-interactively-get-universe (arg)
+(defun mumemo-universe-get-interactively (arg)
   (if (and (not arg) mumemo-current-universe)
       mumemo-current-universe
     (let ((name (completing-read "Which universe: " 
-				 (mumemo-universes-names)
+				 (mumemo-universe-names)
 				 nil t 
 				 (mumemo-universe-name (or mumemo-current-universe
 							   (car mumemo-universes))))))
-      (mumemo-get-universe name))))
-
-(defun mumemo-create-file (universe)
-  "Create new mumemo file"
-  (interactive (list (mumemo-interactively-get-universe current-prefix-arg)))
-  (let* ((dir (mumemo-universe-directory universe))
-	 (path (format-time-string (mumemo-universe-path-template universe)))
-	 (a-path (concat dir "/" path)))
-    (make-directory (file-name-directory a-path) t)
-    (find-file a-path)
-    ;; TODO: add temlate?
-))
-
+      (mumemo-universe-get name))))
 
 (defstruct mumemo-item 
   universe  ; universe to which this item belongs
@@ -61,7 +49,7 @@
   snippet   ; snippet string cache
   mtime)    ; mtime in Elisp way (high low usec psec)
 
-(defun mumemo-create-item (universe path)
+(defun mumemo-item-create (universe path)
   (let* ((a-path (concat (mumemo-universe-directory universe) "/" path))
 	 (mtime (nth 5 (file-attributes a-path))))
     (make-mumemo-item :universe universe :path  path :mtime mtime)))
@@ -96,11 +84,11 @@
 	       (let ((path (if (equal dir ".") file (concat dir "/" file))))
 		 (if (file-directory-p path)
 		     (push path dir-stack)
-		   (push (mumemo-create-item universe path) result)))))
+		   (push (mumemo-item-create universe path) result)))))
 	 files)))
     result))
 
-(defun mumemo-open-item (item)
+(defun mumemo-item-open (item)
   (find-file (mumemo-item-get-absolute-path item)))
 
 
@@ -127,5 +115,17 @@
 		    (not (time-less-p (mumemo-item-mtime item0)
 				     (mumemo-item-mtime item1)))))))
     (mumemo-list-new-buffer "*mumemo*" sorted-items)))
+
+
+(defun mumemo-create-file (universe)
+  "Create new mumemo file"
+  (interactive (list (mumemo-universe-get-interactively current-prefix-arg)))
+  (let* ((dir (mumemo-universe-directory universe))
+	 (path (format-time-string (mumemo-universe-path-template universe)))
+	 (a-path (concat dir "/" path)))
+    (make-directory (file-name-directory a-path) t)
+    (find-file a-path)
+    ;; TODO: add temlate?
+))
 
 (provide 'mumemo)
