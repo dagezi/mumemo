@@ -42,6 +42,7 @@
     (setq buffer-read-only t)
     (mumemo-list-mode)
     (setq truncate-lines t)
+    (goto-char (point-min))
     (switch-to-buffer buffer)))
 
 (defun mumemo-list-open (position)

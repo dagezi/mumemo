@@ -36,11 +36,11 @@
 (defun mumemo-universe-get-interactively (arg)
   (if (and (not arg) mumemo-current-universe)
       mumemo-current-universe
-    (let ((name (completing-read "Which universe: " 
-				 (mumemo-universe-names)
-				 nil t 
-				 (mumemo-universe-name (or mumemo-current-universe
-							   (car mumemo-universes))))))
+    (let* ((default (mumemo-universe-name (or mumemo-current-universe
+					      (car mumemo-universes))))
+	   (name (completing-read (format "Which universe [%s]: " default)
+				  (mumemo-universe-names)
+				  nil t nil nil default)))
       (mumemo-universe-get name))))
 
 (defstruct mumemo-item 
@@ -80,7 +80,7 @@
 	     (files (directory-files dir nil nil t))) ;; TODO: add match
 	(mapc
 	 #'(lambda (file)
-	     (unless (string-match "^\\.\\.?$" file)
+	     (unless (string-match "^[\\.#]" file)
 	       (let ((path (if (equal dir ".") file (concat dir "/" file))))
 		 (if (file-directory-p path)
 		     (push path dir-stack)
