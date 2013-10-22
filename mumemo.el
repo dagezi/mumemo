@@ -91,6 +91,44 @@
 (defun mumemo-item-open (item)
   (find-file (mumemo-item-get-absolute-path item)))
 
+(defun mumemo-item-by-filename (filename)
+  (save-match-data
+    (some #'(lambda (univ)
+	      (and (string-match 
+		    (concat "^" (mumemo-universe-directory univ) "/")
+		    filename)
+		   (mumemo-item-create 
+		    univ (substring filename (match-end 0)))))
+	  mumemo-universes)))
+
+(defvar mumemo-referred-items nil "Opened items in this session")
+
+(defun mumemo-find-file-hook ()
+  (let ((item (mumemo-item-by-filename (buffer-file-name))))
+    (when item
+      (setq mumemo-referred-items (delete item mumemo-referred-items))
+      (push item mumemo-referred-items))))
+
+(add-hook 'find-file-hook #'mumemo-find-file-hook)
+
+(defun mumemo-select-buffer-by-snippet ()
+  (interactive)
+  (let* ((items 
+	  (mapcan
+	   #'(lambda (buffer)
+	       (with-current-buffer buffer
+		 (let ((item (and buffer-file-name 
+				  (mumemo-item-by-filename buffer-file-name))))
+		   (and item (list item)))))
+	   (buffer-list)))
+	 (snippets
+	  (mapcar #'mumemo-item-get-snippet items))
+	 (snippet (completing-read "Howm buffer: " snippets nil t nil 
+				   'snippets)))
+    (when snippet
+      (let ((item (find snippet items :test #'equal :key #'mumemo-item-get-snippet)))
+	(mumemo-item-open item)))))
+
 
 (defvar mumemo-list-recent-days 14)
 
@@ -133,6 +171,7 @@
 (defvar mumemo-global-map (make-sparse-keymap))
 (define-key mumemo-global-map "c" #'mumemo-create-file)
 (define-key mumemo-global-map "l" #'mumemo-show-recent-files)
+(define-key mumemo-global-map "b" #'mumemo-select-buffer-by-snippet)
 
 (global-set-key mumemo-prefix-key mumemo-global-map)
 
