@@ -6,14 +6,18 @@
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'mumemo-list-mode)
+  (setq mode-name "Mumemo-List")
   (use-local-map mumemo-list-mode-map))
 
 (defvar mumemo-list-mode-map
   (make-sparse-keymap))
 
-(define-key mumemo-list-mode-map "\C-m" 'mumemo-list-open)
-(define-key mumemo-list-mode-map "\C-j" 'mumemo-list-open)
-
+(define-key mumemo-list-mode-map "\C-m" #'mumemo-list-open)
+(define-key mumemo-list-mode-map "\C-j" #'mumemo-list-open)
+(define-key mumemo-list-mode-map "n" #'next-line)
+(define-key mumemo-list-mode-map "p" #'previous-line)
+(define-key mumemo-list-mode-map "e" #'mumemo-list-open)
+(define-key mumemo-list-mode-map "q" #'bury-buffer)
 
 (defun mumemo-put-item-property-to-string (string item)
   (put-text-property 0 (length string) :mumemo-item item string)
