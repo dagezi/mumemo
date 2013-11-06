@@ -144,7 +144,9 @@
 	   #'(lambda (universe)
 	       (remove-if 
 		#'(lambda (item) 
-		    (time-less-p (mumemo-item-mtime item) threshold))
+                    (let ((mtime (mumemo-item-mtime item)))
+                      (or (null mtime)
+                          (time-less-p (mumemo-item-mtime item) threshold))))
 		(mumemo-universe-get-all-items universe)))
 	   mumemo-universes))
 	 (sorted-items 
