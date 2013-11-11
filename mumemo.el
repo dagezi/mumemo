@@ -123,7 +123,7 @@
 	   (buffer-list)))
 	 (snippets
 	  (mapcar #'mumemo-item-get-snippet items))
-	 (snippet (completing-read "Howm buffer: " snippets nil t nil 
+	 (snippet (completing-read "Mumemo buffer: " snippets nil t nil 
 				   'snippets)))
     (when snippet
       (let ((item (find snippet items :test #'equal :key #'mumemo-item-get-snippet)))
@@ -165,7 +165,7 @@
 	 (a-path (concat dir "/" path)))
     (make-directory (file-name-directory a-path) t)
     (find-file a-path)
-    ;; TODO: add temlate?
+    ;; TODO: add template?
 ))
 
 (defcustom mumemo-prefix-key "\C-c," "*Prefix key of mumemo commands")
