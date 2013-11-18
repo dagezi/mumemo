@@ -31,6 +31,8 @@ TODO: Be independent from CWD.")
 
 (defmacro mumemo-deftest (name arg &rest body)
  ;; TODO: suport DOCSTRING and KEYs.
+  (declare 
+   (indent defun))
   `(ert-deftest ,name ,arg
      (let ((mumemo-universes mumemo-test-universes))
        ,@body)))
