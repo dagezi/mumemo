@@ -3,6 +3,7 @@
 ;; TODO:
 ;;; 1. Sort result by last modified date
 ;;; 2. If target matched on the snippet of the content, reise it.
+;;;    Maybe this recognize header.
 ;;; 3. One line for one file.
 ;;; 3.1. Present like tree-structure.
 
@@ -15,9 +16,10 @@
                            (read-string "Option: " default-flag)
                          default-flag))))
   (let ((args `("find"
-                ,@(mapcar #'mumemo-universe-directory mumemo-universes)
+                ,@(mapcar #'(lambda (univ) 
+                              (file-name-as-directory (mumemo-universe-directory univ)))
+                          mumemo-universes)
                 "-type" "f" "-exec" "grep" "-nH" ,flags "-e" ,regexp "{}" "+")))
     (compilation-start (combine-and-quote-strings args))))
-
 
 (provide 'mumemo-search)
