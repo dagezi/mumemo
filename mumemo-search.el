@@ -19,3 +19,5 @@
                 "-type" "f" "-exec" "grep" "-nH" ,flags "-e" ,regexp "{}" "+")))
     (compilation-start (combine-and-quote-strings args))))
 
+
+(provide 'mumemo-search)

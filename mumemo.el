@@ -7,6 +7,7 @@
 (require 'cl)
 
 (require 'mumemo-list)
+(require 'mumemo-search)
 
 (defstruct mumemo-universe 
   name directory path-template)  ;; TODO: remember symbolic dir like "~/howm"
@@ -174,6 +175,7 @@
 (define-key mumemo-global-map "c" #'mumemo-create-file)
 (define-key mumemo-global-map "l" #'mumemo-show-recent-files)
 (define-key mumemo-global-map "b" #'mumemo-select-buffer-by-snippet)
+(define-key mumemo-global-map "g" #'mumemo-search)
 
 (global-set-key mumemo-prefix-key mumemo-global-map)
 
