@@ -17,9 +17,13 @@
                          default-flag))))
   (let ((args `("find"
                 ,@(mapcar #'(lambda (univ) 
-                              (file-name-as-directory (mumemo-universe-directory univ)))
+                              (shell-quote-argument
+                               (file-name-as-directory (mumemo-universe-directory univ))))
                           mumemo-universes)
-                "-type" "f" "-exec" "grep" "-nH" ,flags "-e" ,regexp "{}" "+")))
-    (compilation-start (combine-and-quote-strings args))))
+                "-type" "f" "-exec" "grep" "-nH" ,flags 
+                "-e" ,(shell-quote-argument regexp) "{}" "+")))
+    (compilation-start (mapconcat #'identity args " "))))
 
 (provide 'mumemo-search)
+
+
